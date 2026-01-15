@@ -36,7 +36,7 @@
       gap: 20px; 
     }
 
-    /* --- RESPONSIVE HEADER --- */
+    /* --- HEADER --- */
     .header {
       display: grid;
       grid-template-columns: 1fr; 
@@ -109,7 +109,7 @@
       transition: all 0.2s ease;
     }
 
-    /* --- VIEWPORT BOX --- */
+    /* --- MASTERPLAN VIEWPORT --- */
     .viewport-outer { width: 100%; display: flex; flex-direction: column; align-items: center; }
     
     .viewport-box { 
@@ -156,18 +156,19 @@
       align-items: center;
       text-align: center;
       gap: 4px;
+      transition: all 0.2s;
     }
     
     .btn-zone span { font-size: 8px; color: var(--accent); text-transform: uppercase; }
-    .btn-zone.active { background: var(--accent); color: #000; }
+    .btn-zone.active { background: var(--accent); color: #000; border-color: #fff; }
     .btn-zone.active span { color: #000; }
 
-    /* --- CONTENT LAYOUT --- */
+    /* --- CONTENT AREA --- */
     .content-layout { 
       display: grid; 
       grid-template-columns: 1fr; 
       gap: 20px; 
-      scroll-margin-top: 20px; /* Space above content when scrolled */
+      scroll-margin-top: 30px;
     }
     
     @media (min-width: 1024px) { .content-layout { grid-template-columns: 1.2fr 0.8fr; } }
@@ -184,16 +185,15 @@
     .nav-arrow {
       position: absolute; top: 50%; transform: translateY(-50%);
       background: rgba(0,212,255,0.2); border: 1px solid var(--accent); color: var(--accent);
-      width: 36px; height: 36px; border-radius: 50%; cursor: pointer; z-index: 10;
+      width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
     }
+    .nav-arrow:hover { background: var(--accent); color: #000; }
 
     .sub-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
     @media (min-width: 768px) and (max-width: 1023px) { .sub-grid { grid-template-columns: 1fr 1.8fr; } }
 
-    .pdf-viewer-container { width: 100%; aspect-ratio: 1 / 1.4; background: #000; }
-    @media (min-width: 1024px) { .pdf-viewer-container { aspect-ratio: 1.414 / 1; } }
-
-    /* POPUP */
+    /* --- POPUP OVERLAY --- */
     #popOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px);
@@ -201,8 +201,14 @@
     }
     #popOverlay.active { display: flex; }
     .pop-container { position: relative; width: 95%; height: 95%; display: flex; justify-content: center; align-items: center; }
-    .pop-container img { max-width: 100%; max-height: 100%; }
-    .pop-close { position: absolute; top: 10px; right: 10px; color: #fff; background: #333; border: none; font-size: 24px; cursor: pointer; border-radius: 50%; width: 40px; height: 40px; }
+    .pop-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .pop-close { position: absolute; top: 20px; right: 20px; color: #fff; background: rgba(255,255,255,0.1); border: 1px solid var(--border); font-size: 20px; cursor: pointer; border-radius: 50%; width: 45px; height: 45px; z-index: 100; }
+    .pop-close:hover { background: #ff4444; }
+
+    /* Updated Layout Container */
+    .layout-viewer-container { width: 100%; aspect-ratio: 1 / 1.4; background: #000; position: relative; overflow: hidden; cursor: grab; display: flex; justify-content: center; align-items: center; }
+    @media (min-width: 1024px) { .layout-viewer-container { aspect-ratio: 1.414 / 1; } }
+    #layoutAvif { max-width: 100%; transition: transform 0.05s linear; will-change: transform; }
   </style>
 </head>
 <body>
@@ -233,8 +239,8 @@
       <img src="Layout.png" id="layoutImg" alt="Masterplan Layout">
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 75vw; margin: 10px 0;">
-        <p style="font-size: 10px; color: var(--muted); margin: 0;">Pinch/Scroll to Zoom</p>
-        <button onclick="resetView()" style="background: rgba(0,212,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 700;">RESET</button>
+        <p style="font-size: 10px; color: var(--muted); margin: 0;">Pinch/Scroll to Zoom | Drag to Pan</p>
+        <button onclick="resetView()" style="background: rgba(0,212,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 700;">RESET VIEW</button>
     </div>
   </section>
 
@@ -267,11 +273,15 @@
 
   <section class="card">
     <div class="card-header">
-      <h4>Layout Drawing</h4>
-      <a href="Lighting Layout_ Neighborhood parks in Al Warqa and al Mizhar Area- Group C.pdf" target="_blank" style="color: var(--accent); font-size: 10px; text-decoration: none;">FULL PDF</a>
+      <h4>Lighting Layout</h4>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Pinch to Zoom / Drag to Move</span>
+        <button onclick="resetLayoutView()" style="background: rgba(0,212,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 700;">RESET</button>
+        <a href="Lighting Layout_ Neighborhood parks in Al Warqa and al Mizhar Area- Group C.pdf" target="_blank" style="color: var(--accent); font-size: 10px; text-decoration: none; border-left: 1px solid var(--border); padding-left: 12px;">PDF VERSION</a>
+      </div>
     </div>
-    <div class="pdf-viewer-container">
-      <embed src="Lighting Layout_ Neighborhood parks in Al Warqa and al Mizhar Area- Group C.pdf#toolbar=0" type="application/pdf" width="100%" height="100%" />
+    <div class="layout-viewer-container" id="lVpContainer">
+      <img src="Lighting Layoput.avif" id="layoutAvif" alt="Detailed Lighting Layout">
     </div>
   </section>
 </div>
@@ -279,12 +289,22 @@
 <div id="popOverlay">
   <div class="pop-container">
     <button class="pop-close" onclick="closePop()">✕</button>
+    <button class="nav-arrow" id="pop_prev" style="left:20px;" onclick="changeImg(-1)">&#10094;</button>
     <img id="popImg" src="">
+    <button class="nav-arrow" id="pop_next" style="right:20px;" onclick="changeImg(1)">&#10095;</button>
   </div>
 </div>
 
 <script>
-  /* --- PAN & ZOOM --- */
+  /* --- PAGE LOAD SETTINGS --- */
+  // Forces the browser to ignore previous scroll position on refresh
+  if (history.scrollRestoration) {
+    history.scrollRestoration = 'manual';
+  }
+  // Scrolls to the top of the page immediately
+  window.scrollTo(0, 0);
+
+  /* --- MASTERPLAN PAN & ZOOM (TOP) --- */
   const vp = document.getElementById('vpContainer');
   const img = document.getElementById('layoutImg');
   let scale = 1, panning = false, pointX = 0, pointY = 0, start = { x: 0, y: 0 };
@@ -293,16 +313,35 @@
   function resetView() { scale = 1; pointX = 0; pointY = 0; setTransform(); }
 
   vp.onmousedown = (e) => { e.preventDefault(); start = { x: e.clientX - pointX, y: e.clientY - pointY }; panning = true; }
-  window.onmouseup = () => { panning = false; }
+  window.addEventListener('mouseup', () => { panning = false; });
   vp.onmousemove = (e) => { if (!panning) return; pointX = (e.clientX - start.x); pointY = (e.clientY - start.y); setTransform(); }
   vp.onwheel = (e) => { e.preventDefault(); const delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY); scale = Math.min(Math.max(0.5, scale + (delta > 0 ? 0.1 : -0.1)), 5); setTransform(); }
 
-  /* --- ZONES --- */
+  /* --- DETAILED LAYOUT PAN & ZOOM (BOTTOM) --- */
+  const lVp = document.getElementById('lVpContainer');
+  const lImg = document.getElementById('layoutAvif');
+  let lScale = 1, lPanning = false, lPointX = 0, lPointY = 0, lStart = { x: 0, y: 0 };
+
+  function setLayoutTransform() { lImg.style.transform = `translate(${lPointX}px, ${lPointY}px) scale(${lScale})`; }
+  function resetLayoutView() { lScale = 1; lPointX = 0; lPointY = 0; setLayoutTransform(); }
+
+  lVp.onmousedown = (e) => { e.preventDefault(); lStart = { x: e.clientX - lPointX, y: e.clientY - lPointY }; lPanning = true; lVp.style.cursor = 'grabbing'; }
+  window.addEventListener('mouseup', () => { lPanning = false; lVp.style.cursor = 'grab'; });
+  lVp.onmousemove = (e) => { if (!lPanning) return; lPointX = (e.clientX - lStart.x); lPointY = (e.clientY - lStart.y); setLayoutTransform(); }
+  lVp.onwheel = (e) => { e.preventDefault(); const delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY); lScale = Math.min(Math.max(1, lScale + (delta > 0 ? 0.2 : -0.2)), 8); setLayoutTransform(); }
+
+  /* --- DYNAMIC ZONE MANAGEMENT --- */
   const zoneNames = ["Food and Beverages Area", "Plaza", "Jogging Track", "Paddle Court", "Volley Ball Court", "Tennis Court", "Footbal Court", "Stage Area", "Kids Zone", "Shade Play Area 01", "Shade Play Area 02", "Pathway 01", "Pathway 02", "Pathway 03", "Big Lawn", "Open Area"];
-  let cz = 1, ci = 1;
+  let cz = 1, ci = 1; 
+  let currentPopupType = 'main';
+
+  const mainDisplay = document.getElementById('main_display');
+  const popImg = document.getElementById('popImg');
+  const overlay = document.getElementById('popOverlay');
+
+  mainDisplay.onerror = function() { if (ci > 1) { ci = 1; updateUI(); } };
+
   const btnContainer = document.getElementById('zone_buttons');
-  const contentSection = document.getElementById('content_section');
-  
   zoneNames.forEach((name, i) => {
     const idx = i + 1;
     const b = document.createElement('button');
@@ -312,31 +351,61 @@
       document.querySelectorAll('.btn-zone').forEach(btn => btn.classList.remove('active'));
       b.classList.add('active');
       cz = idx; ci = 1; updateUI();
-      
-      // Auto-scroll to the content section
-      contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('content_section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
     btnContainer.appendChild(b);
   });
 
-  function changeImg(n) { ci += n; if(ci > 5) ci = 1; if(ci < 1) ci = 5; updateUI(); }
-  function updateUI() {
-    document.getElementById('zone_title').innerText = `Zone ${String(cz).padStart(2, '0')}: ${zoneNames[cz-1]}`;
-    document.getElementById('img_counter').innerText = `VIEW ${String(ci).padStart(2, '0')}`;
-    document.getElementById('main_display').src = `Z${cz}0${ci}.png`;
-    document.getElementById('calc_display').src = `Z${cz}R.png`;
-    document.getElementById('fixture_display').src = `Z${cz}F.png`;
+  function changeImg(n) { 
+    if(currentPopupType === 'main') {
+        ci += n; 
+        if(ci > 5) ci = 1; 
+        if(ci < 1) ci = 5; 
+        updateUI(); 
+    }
   }
 
-  const overlay = document.getElementById('popOverlay');
+  function updateUI() {
+    const mainPath = `Z${cz}0${ci}.png`;
+    const calcPath = `Z${cz}R.png`;
+    const fixPath = `Z${cz}F.png`;
+    document.getElementById('zone_title').innerText = `Zone ${String(cz).padStart(2, '0')}: ${zoneNames[cz-1]}`;
+    document.getElementById('img_counter').innerText = `VIEW ${String(ci).padStart(2, '0')}`;
+    mainDisplay.src = mainPath;
+    document.getElementById('calc_display').src = calcPath;
+    document.getElementById('fixture_display').src = fixPath;
+    if (overlay.classList.contains('active') && currentPopupType === 'main') popImg.src = mainPath;
+  }
+
   function openPop(type) {
-    const popImg = document.getElementById('popImg');
-    if(type === 'main') popImg.src = `Z${cz}0${ci}.png`;
-    if(type === 'calc') popImg.src = `Z${cz}R.png`;
-    if(type === 'fix') popImg.src = `Z${cz}F.png`;
+    currentPopupType = type;
+    const popPrev = document.getElementById('pop_prev');
+    const popNext = document.getElementById('pop_next');
+    if(type === 'main') {
+        popImg.src = `Z${cz}0${ci}.png`;
+        popPrev.style.display = 'flex';
+        popNext.style.display = 'flex';
+    } else if(type === 'calc') {
+        popImg.src = `Z${cz}R.png`;
+        popPrev.style.display = 'none';
+        popNext.style.display = 'none';
+    } else {
+        popImg.src = `Z${cz}F.png`;
+        popPrev.style.display = 'none';
+        popNext.style.display = 'none';
+    }
     overlay.classList.add('active');
   }
+
   function closePop() { overlay.classList.remove('active'); }
+
+  document.addEventListener('keydown', (e) => {
+    if (!overlay.classList.contains('active')) return;
+    if (e.key === "ArrowLeft") changeImg(-1);
+    if (e.key === "ArrowRight") changeImg(1);
+    if (e.key === "Escape") closePop();
+  });
+
   updateUI();
 </script>
 </body>
