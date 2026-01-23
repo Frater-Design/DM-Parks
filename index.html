@@ -121,7 +121,6 @@
       overflow: hidden; 
       border: 1px solid var(--border);
       cursor: grab;
-      /* Vital for centering shrink-wrapped wrapper */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -131,7 +130,6 @@
       .viewport-box { width: 85vw; height: 600px; max-height: 80vh; }
     }
 
-    /* FIX: display: inline-block makes the wrapper the EXACT size of the image */
     #mapWrapper { 
         position: relative; 
         display: inline-block;
@@ -147,7 +145,6 @@
         pointer-events: none; 
     }
 
-    /* Interactive Zone Overlay Styles */
     .map-zone {
       position: absolute;
       cursor: pointer;
@@ -372,7 +369,7 @@
   vp.onmousemove = (e) => { if (!panning) return; pointX = (e.clientX - start.x); pointY = (e.clientY - start.y); setTransform(); }
   vp.onwheel = (e) => { e.preventDefault(); const delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY); scale = Math.min(Math.max(0.5, scale + (delta > 0 ? 0.1 : -0.1)), 5); setTransform(); }
 
-  /* --- DETAILED LAYOUT PAN & ZOOM (BOTTOM) --- */
+  /* --- DETAILED LAYOUT PAN & ZOOM --- */
   const lVp = document.getElementById('lVpContainer');
   const lImg = document.getElementById('layoutAvif');
   let lScale = 1, lPanning = false, lPointX = 0, lPointY = 0, lStart = { x: 0, y: 0 };
@@ -382,7 +379,7 @@
 
   lVp.onmousedown = (e) => { e.preventDefault(); lStart = { x: e.clientX - lPointX, y: e.clientY - lPointY }; lPanning = true; lVp.style.cursor = 'grabbing'; }
   window.addEventListener('mouseup', () => { lPanning = false; lVp.style.cursor = 'grab'; });
-  lVp.onmousemove = (e) => { if (!lPanning) return; lPointX = (e.clientX - lStart.x); lPointY = (e.clientY - lStart.y); setLayoutTransform(); }
+  lVp.onmousemove = (e) => { if (!lPanning) return; lPointX = (lStart.x - e.clientX) * -1; lPointY = (lStart.y - e.clientY) * -1; setLayoutTransform(); }
   lVp.onwheel = (e) => { e.preventDefault(); const delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY); lScale = Math.min(Math.max(1, lScale + (delta > 0 ? 0.2 : -0.2)), 8); setLayoutTransform(); }
 
   /* --- DYNAMIC ZONE MANAGEMENT --- */
@@ -393,6 +390,11 @@
   const mainDisplay = document.getElementById('main_display');
   const popImg = document.getElementById('popImg');
   const overlay = document.getElementById('popOverlay');
+
+  // Logic to handle missing images on initial load
+  mainDisplay.onerror = function() {
+    if (ci > 1) { ci = 1; updateUI(); }
+  };
 
   const btnContainer = document.getElementById('zone_buttons');
   zoneNames.forEach((name, i) => {
@@ -415,12 +417,32 @@
     if (btn) btn.click();
   }
 
+  /**
+   * FIX: Check if image exists before moving index.
+   * Creates a cleaner loop when zones have fewer than 5 images.
+   */
   function changeImg(n) { 
     if(currentPopupType === 'main') {
-        ci += n; 
-        if(ci > 5) ci = 1; 
-        if(ci < 1) ci = 5; 
-        updateUI(); 
+        let nextIndex = ci + n;
+        if(nextIndex > 5) nextIndex = 1; 
+        if(nextIndex < 1) nextIndex = 5; 
+
+        // Silent pre-load check
+        const testImg = new Image();
+        testImg.onload = () => { ci = nextIndex; updateUI(); };
+        testImg.onerror = () => { 
+            // If the next image doesn't exist, reset to 1
+            if(n > 0) { 
+                ci = 1; 
+                updateUI(); 
+            } else {
+                // If going backward and it fails, stay on current or try lower indices
+                // Simplest fix: just wrap to 1
+                ci = 1;
+                updateUI();
+            }
+        };
+        testImg.src = `Z${cz}0${nextIndex}.png`;
     }
   }
 
