@@ -115,22 +115,51 @@
     .viewport-box { 
       position: relative; 
       width: 100%;
-      height: 300px; 
+      height: 350px; 
       background: #000; 
       border-radius: var(--radius); 
       overflow: hidden; 
       border: 1px solid var(--border);
       cursor: grab;
+      /* Vital for centering shrink-wrapped wrapper */
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
     @media (min-width: 1024px) {
-      .viewport-box { width: 75vw; height: 500px; aspect-ratio: 3.5 / 2.5; max-height: 70vh; }
+      .viewport-box { width: 85vw; height: 600px; max-height: 80vh; }
     }
 
-    #layoutImg { max-width: 100%; max-height: 100%; transition: transform 0.05s linear; will-change: transform; }
+    /* FIX: display: inline-block makes the wrapper the EXACT size of the image */
+    #mapWrapper { 
+        position: relative; 
+        display: inline-block;
+        transition: transform 0.05s linear; 
+        will-change: transform; 
+        transform-origin: center center;
+    }
+
+    #layoutImg { 
+        display: block;
+        max-width: 100%; 
+        max-height: 80vh; 
+        pointer-events: none; 
+    }
+
+    /* Interactive Zone Overlay Styles */
+    .map-zone {
+      position: absolute;
+      cursor: pointer;
+      background: rgba(0, 212, 255, 0); 
+      border-radius: 4px;
+      z-index: 100;
+    }
+    .map-zone:hover {
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+    }
 
     /* --- ZONE NAVIGATION --- */
     .zone-nav { 
@@ -205,7 +234,6 @@
     .pop-close { position: absolute; top: 20px; right: 20px; color: #fff; background: rgba(255,255,255,0.1); border: 1px solid var(--border); font-size: 20px; cursor: pointer; border-radius: 50%; width: 45px; height: 45px; z-index: 100; }
     .pop-close:hover { background: #ff4444; }
 
-    /* Updated Layout Container */
     .layout-viewer-container { width: 100%; aspect-ratio: 1 / 1.4; background: #000; position: relative; overflow: hidden; cursor: grab; display: flex; justify-content: center; align-items: center; }
     @media (min-width: 1024px) { .layout-viewer-container { aspect-ratio: 1.414 / 1; } }
     #layoutAvif { max-width: 100%; transition: transform 0.05s linear; will-change: transform; }
@@ -237,10 +265,29 @@
 
   <section class="viewport-outer">
     <div class="viewport-box" id="vpContainer">
-      <img src="Layout.png" id="layoutImg" alt="Masterplan Layout">
+      <div id="mapWrapper">
+          <img src="Layout.png" id="layoutImg" alt="Masterplan Layout">
+          
+          <div class="map-zone" style="top: 17.2%; left: 12.2%; width: 8.0%; height: 3.8%;" onclick="triggerZone(1)"></div>
+          <div class="map-zone" style="top: 13.2%; left: 28.3%; width: 5.0%; height: 4.0%;" onclick="triggerZone(2)"></div>
+          <div class="map-zone" style="top: 36.1%; left: 62.1%; width: 5.0%; height: 4.0%;" onclick="triggerZone(3)"></div>
+          <div class="map-zone" style="top: 49.2%; left: 18.2%; width: 5.0%; height: 4.0%;" onclick="triggerZone(4)"></div>
+          <div class="map-zone" style="top: 61.4%; left: 23.0%; width: 5.6%; height: 4.0%;" onclick="triggerZone(5)"></div>
+          <div class="map-zone" style="top: 51.0%; left: 32.0%; width: 5.0%; height: 4.0%;" onclick="triggerZone(6)"></div>
+          <div class="map-zone" style="top: 74.5%; left: 40.3%; width: 5.0%; height: 4.0%;" onclick="triggerZone(7)"></div>
+          <div class="map-zone" style="top: 75.1%; left: 53.8%; width: 5.0%; height: 4.0%;" onclick="triggerZone(8)"></div>
+          <div class="map-zone" style="top: 84.0%; left: 64.7%; width: 5.0%; height: 4.0%;" onclick="triggerZone(9)"></div>
+          <div class="map-zone" style="top: 48.0%; left: 63.9%; width: 6.5%; height: 4.0%;" onclick="triggerZone(10)"></div>
+          <div class="map-zone" style="top: 33.9%; left: 75.0%; width: 6.4%; height: 4.0%;" onclick="triggerZone(11)"></div>
+          <div class="map-zone" style="top: 22.8%; left: 82.5%; width: 5.0%; height: 4.0%;" onclick="triggerZone(12)"></div>
+          <div class="map-zone" style="top: 70.7%; left: 46.1%; width: 5.0%; height: 4.0%;" onclick="triggerZone(13)"></div>
+          <div class="map-zone" style="top: 52.8%; left: 06.3%; width: 5.0%; height: 4.0%;" onclick="triggerZone(14)"></div>
+          <div class="map-zone" style="top: 44.1%; left: 51.2%; width: 5.0%; height: 4.0%;" onclick="triggerZone(15)"></div>
+          <div class="map-zone" style="top: 68.4%; left: 75.6%; width: 5.0%; height: 4.0%;" onclick="triggerZone(16)"></div>
+      </div>
     </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 75vw; margin: 10px 0;">
-        <p style="font-size: 10px; color: var(--muted); margin: 0;">Pinch/Scroll to Zoom | Drag to Pan</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 85vw; margin: 10px 0;">
+        <p style="font-size: 10px; color: var(--muted); margin: 0;">Pinch/Scroll to Zoom | Drag to Pan | Click Zone Labels</p>
         <button onclick="resetView()" style="background: rgba(0,212,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 700;">RESET VIEW</button>
     </div>
   </section>
@@ -254,9 +301,9 @@
         <span id="img_counter" style="color: var(--muted); font-size: 10px;">VIEW 01</span>
       </div>
       <div class="img-stage" onclick="openPop('main')">
-        <button class="nav-arrow" style="left:10px;" onclick="event.stopPropagation(); changeImg(-1)">&#10094;</button>
+        <button class="nav-arrow" style="left:10px; z-index: 5;" onclick="event.stopPropagation(); changeImg(-1)">&#10094;</button>
         <img id="main_display" src="Z101.png">
-        <button class="nav-arrow" style="right:10px;" onclick="event.stopPropagation(); changeImg(1)">&#10095;</button>
+        <button class="nav-arrow" style="right:10px; z-index: 5;" onclick="event.stopPropagation(); changeImg(1)">&#10095;</button>
       </div>
     </div>
 
@@ -277,7 +324,7 @@
       <h4>Lighting Layout</h4>
       <div style="display: flex; gap: 12px; align-items: center;">
         <span style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Pinch to Zoom / Drag to Move</span>
-        <button onclick="resetLayoutView()" style="background: rgba(0,212,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 700;">RESET</button>
+        <button onclick="resetLayoutView()" style="background: rgba(0,212,255,0.1); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: 700;">RESET</button>
         <a href="Lighting Layout_ Neighborhood parks in Al Warqa and al Mizhar Area- Group C.pdf" target="_blank" style="color: var(--accent); font-size: 10px; text-decoration: none; border-left: 1px solid var(--border); padding-left: 12px;">PDF VERSION</a>
       </div>
     </div>
@@ -298,23 +345,30 @@
 
 <script>
   /* --- PAGE LOAD SETTINGS --- */
-  // Forces the browser to ignore previous scroll position on refresh
   if (history.scrollRestoration) {
     history.scrollRestoration = 'manual';
   }
-  // Scrolls to the top of the page immediately
   window.scrollTo(0, 0);
 
-  /* --- MASTERPLAN PAN & ZOOM (TOP) --- */
+  /* --- MASTERPLAN PAN & ZOOM --- */
   const vp = document.getElementById('vpContainer');
-  const img = document.getElementById('layoutImg');
+  const wrapper = document.getElementById('mapWrapper');
   let scale = 1, panning = false, pointX = 0, pointY = 0, start = { x: 0, y: 0 };
 
-  function setTransform() { img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; }
+  function setTransform() { wrapper.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; }
   function resetView() { scale = 1; pointX = 0; pointY = 0; setTransform(); }
 
-  vp.onmousedown = (e) => { e.preventDefault(); start = { x: e.clientX - pointX, y: e.clientY - pointY }; panning = true; }
-  window.addEventListener('mouseup', () => { panning = false; });
+  vp.onmousedown = (e) => { 
+    if (e.target.classList.contains('map-zone')) return; 
+    e.preventDefault(); 
+    start = { x: e.clientX - pointX, y: e.clientY - pointY }; 
+    panning = true; 
+    vp.style.cursor = 'grabbing';
+  }
+  window.addEventListener('mouseup', () => { 
+    panning = false; 
+    vp.style.cursor = 'grab';
+  });
   vp.onmousemove = (e) => { if (!panning) return; pointX = (e.clientX - start.x); pointY = (e.clientY - start.y); setTransform(); }
   vp.onwheel = (e) => { e.preventDefault(); const delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY); scale = Math.min(Math.max(0.5, scale + (delta > 0 ? 0.1 : -0.1)), 5); setTransform(); }
 
@@ -340,13 +394,12 @@
   const popImg = document.getElementById('popImg');
   const overlay = document.getElementById('popOverlay');
 
-  mainDisplay.onerror = function() { if (ci > 1) { ci = 1; updateUI(); } };
-
   const btnContainer = document.getElementById('zone_buttons');
   zoneNames.forEach((name, i) => {
     const idx = i + 1;
     const b = document.createElement('button');
     b.className = `btn-zone ${idx===1 ? 'active' : ''}`;
+    b.id = `btn-zone-${idx}`;
     b.innerHTML = `<span>ZONE ${String(idx).padStart(2, '0')}</span>${name}`;
     b.onclick = () => {
       document.querySelectorAll('.btn-zone').forEach(btn => btn.classList.remove('active'));
@@ -356,6 +409,11 @@
     };
     btnContainer.appendChild(b);
   });
+
+  function triggerZone(idx) {
+    const btn = document.getElementById(`btn-zone-${idx}`);
+    if (btn) btn.click();
+  }
 
   function changeImg(n) { 
     if(currentPopupType === 'main') {
